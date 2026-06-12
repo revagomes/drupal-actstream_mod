@@ -1,0 +1,7 @@
+name: 'Activity Stream Moderation'
+type: module
+description: 'Adds moderation (approve/disapprove) to Activity Stream entities.'
+package: 'Activity Stream'
+core_version_requirement: '^10.3 || ^11'
+dependencies:
+  - actstream:actstream

@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Adds moderation to Activity Stream (actstream_item) entities.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function actstream_mod_entity_base_field_info(EntityTypeInterface $entity_type): array {
+  if ($entity_type->id() !== 'actstream_item') {
+    return [];
+  }
+  $fields['actstream_mod_moderated'] = BaseFieldDefinition::create('boolean')
+    ->setLabel(new TranslatableMarkup('Moderated'))
+    ->setDescription(new TranslatableMarkup('Whether this item has been reviewed by a moderator.'))
+    ->setDefaultValue(FALSE)
+    ->setDisplayOptions('form', [
+      'type' => 'boolean_checkbox',
+      'weight' => 20,
+    ])
+    ->setDisplayConfigurable('form', TRUE);
+  return $fields;
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function actstream_mod_entity_presave(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'actstream_item' || !$entity->isNew()) {
+    return;
+  }
+  $entity->set('status', FALSE);
+  $entity->set('actstream_mod_moderated', FALSE);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for actstream_item_default_form.
+ */
+function actstream_mod_form_actstream_item_default_form_alter(
+  array &$form,
+  FormStateInterface $form_state,
+  string $form_id,
+): void {
+  $form['actstream_mod_moderated']['#access'] = FALSE;
+
+  if (!\Drupal::currentUser()->hasPermission('moderate actstream items')) {
+    return;
+  }
+
+  $form['actions']['submit']['#access'] = FALSE;
+
+  $base = [
+    '#type' => 'submit',
+    '#weight' => 10,
+    '#submit' => ['::submitForm', 'actstream_mod_moderate_submit', '::save'],
+  ];
+
+  $form['actions']['approve'] = $base + [
+    '#value' => new TranslatableMarkup('Approve'),
+    '#attributes' => ['class' => ['actstream-mod-button', 'approve']],
+    '#actstream_mod_op' => 'approve',
+  ];
+
+  $form['actions']['disapprove'] = $base + [
+    '#value' => new TranslatableMarkup('Disapprove'),
+    '#attributes' => ['class' => ['actstream-mod-button', 'disapprove']],
+    '#actstream_mod_op' => 'disapprove',
+  ];
+}
+
+/**
+ * Submit handler for the Approve/Disapprove moderation buttons.
+ */
+function actstream_mod_moderate_submit(array &$form, FormStateInterface $form_state): void {
+  $op = $form_state->getTriggeringElement()['#actstream_mod_op'] ?? '';
+  $entity = $form_state->getFormObject()->getEntity();
+  $entity->set('status', $op === 'approve');
+  $entity->set('actstream_mod_moderated', TRUE);
+}

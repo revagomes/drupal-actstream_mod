@@ -1,0 +1,4 @@
+moderate actstream items:
+  title: 'Moderate Activity Stream items'
+  description: 'Approve or disapprove incoming activity stream items.'
+  restrict access: true

@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall hooks for Activity Stream Moderation.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function actstream_mod_install(): void {
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $storage_definitions = \Drupal::service('entity_field.manager')
+    ->getFieldStorageDefinitions('actstream_item');
+  if (isset($storage_definitions['actstream_mod_moderated'])) {
+    $update_manager->installFieldStorageDefinition(
+      'actstream_mod_moderated',
+      'actstream_item',
+      'actstream_mod',
+      $storage_definitions['actstream_mod_moderated']
+    );
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function actstream_mod_uninstall(): void {
+  $definition = \Drupal::entityDefinitionUpdateManager()
+    ->getFieldStorageDefinition('actstream_mod_moderated', 'actstream_item');
+  if ($definition) {
+    \Drupal::entityDefinitionUpdateManager()
+      ->uninstallFieldStorageDefinition($definition);
+  }
+}

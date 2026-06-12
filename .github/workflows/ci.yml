@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ['2.0.x']
+  pull_request:
+    branches: ['2.0.x']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dev dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: PHP lint
+        run: |
+          find . -name '*.php' -not -path './.git/*' -not -path './vendor/*' \
+            -exec php -l {} \;
+
+      - name: PHP CodeSniffer
+        run: |
+          vendor/bin/phpcs --standard=Drupal,DrupalPractice \
+            --extensions=php,module,install \
+            actstream_mod.module actstream_mod.install
