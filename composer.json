@@ -18,12 +18,24 @@
   "require": {
     "php": "^8.1",
     "drupal/core": "^10.3 || ^11",
-    "drupal/actstream": "^2.0"
+    "drupal/actstream": "dev-2.0.x"
   },
   "require-dev": {
     "drupal/coder": "^8.3",
     "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
   },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/revagomes/drupal-actstream"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
