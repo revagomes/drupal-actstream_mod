@@ -29,7 +29,7 @@ On install the module adds an `actstream_mod_moderated` boolean field to the `ac
 
 ## How it works
 
-| Behaviour | Details |
+| Behavior | Details |
 |-----------|---------|
 | New items | Always saved as unpublished (`status = 0`) and unmoderated |
 | Edit form | Approve and Disapprove buttons replace the default Save button for users with the moderation permission |
